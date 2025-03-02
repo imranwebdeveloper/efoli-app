@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Collection {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  priority  Priority?
+  products  ProductCollection[]
+  createdAt DateTime @default(now())  
+}
+
+model Product {
+  id         String   @id
+  title      String
+  imageUrl   String?
+  createdAt  DateTime @default(now())  
+  collections ProductCollection[]
+}
+
+model ProductCollection {
+  collectionId Int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  @@id([collectionId, productId]) 
+}
