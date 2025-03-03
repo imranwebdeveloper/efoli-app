@@ -13,11 +13,7 @@ export function CollectionDetails({ collection }: any) {
   const shopify = useAppBridge();
 
   if (!collection) {
-    return (
-      <Text variant="bodyMd" tone="critical" as="p">
-        No collection found.
-      </Text>
-    );
+    return null;
   }
 
   return (

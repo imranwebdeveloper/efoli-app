@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "c301d5c943eb0aae2720b05005615bdd"
-application_url = "https://gourmet-hb-autumn-crossword.trycloudflare.com"
+application_url = "https://ht-dicke-networks-salem.trycloudflare.com"
 embedded = true
 name = "Efoli"
 handle = "efoli-app"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://gourmet-hb-autumn-crossword.trycloudflare.com/auth/callback",
-  "https://gourmet-hb-autumn-crossword.trycloudflare.com/auth/shopify/callback",
-  "https://gourmet-hb-autumn-crossword.trycloudflare.com/api/auth/callback"
+  "https://ht-dicke-networks-salem.trycloudflare.com/auth/callback",
+  "https://ht-dicke-networks-salem.trycloudflare.com/auth/shopify/callback",
+  "https://ht-dicke-networks-salem.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

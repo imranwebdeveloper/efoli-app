@@ -50,13 +50,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const priority = formData.get("priority")?.toString();
     const productsString = formData.get("products")?.toString();
 
+    // ✅ **Basic validation**
     if (!name) {
       return Response.json(
         { errors: { name: "Name is required" } },
         { status: 400 },
       );
     }
-
     if (!productsString) {
       return Response.json(
         { errors: { products: "Products are required" } },
@@ -65,40 +65,60 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     const products = JSON.parse(productsString);
-
     if (!Array.isArray(products) || products.length === 0) {
       return Response.json(
-        { errors: { products: "Products are required" } },
+        { errors: { products: "At least one product is required" } },
         { status: 400 },
       );
     }
 
     const method = request.method.toUpperCase();
 
+    // ✅ **Ensure all products exist before creating/updating the collection**
+    const productIds = await Promise.all(
+      products.map(async (product) => {
+        let existingProduct = await prisma.product.findUnique({
+          where: { id: String(product.id) },
+        });
+
+        if (!existingProduct) {
+          existingProduct = await prisma.product.create({
+            data: {
+              id: String(product.id),
+              title: product.title,
+              imageUrl: product.imageUrl || null,
+            },
+          });
+        }
+
+        return existingProduct.id;
+      }),
+    );
+
     if (method === "POST") {
-      // CREATE NEW COLLECTION
+      // ✅ **Create new collection**
       await prisma.collection.create({
         data: {
           name,
           priority: priority as "HIGH" | "MEDIUM" | "LOW",
           products: {
-            create: products.map((product) => ({
-              product: { connect: { id: String(product.id) } },
+            create: productIds.map((productId) => ({
+              product: { connect: { id: productId } },
             })),
           },
         },
       });
     } else if (method === "PUT" && id) {
-      //  UPDATE EXISTING COLLECTION
+      // ✅ **Update existing collection**
       await prisma.collection.update({
         where: { id },
         data: {
           name,
           priority: priority as "HIGH" | "MEDIUM" | "LOW",
           products: {
-            deleteMany: {},
-            create: products.map((product) => ({
-              product: { connect: { id: String(product.id) } },
+            deleteMany: {}, // Remove old product relations
+            create: productIds.map((productId) => ({
+              product: { connect: { id: productId } },
             })),
           },
         },
@@ -112,8 +132,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     return redirect(`/app`);
   } catch (error) {
+    console.error("Error in action function:", error);
     return Response.json(
-      { errors: { form: "An error occurred." } },
+      { errors: { form: "An error occurred while processing your request." } },
       { status: 400 },
     );
   }
